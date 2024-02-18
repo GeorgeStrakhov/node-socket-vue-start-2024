@@ -1,0 +1,27 @@
+# General OS, IDE, editor cruft
+.DS_Store 
+Thumbs.db
+.idea/
+*.swp
+*.log
+*.tmp
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+.dockerignore
+docker-compose.*.yml
+
+# Vue 3
+dist/
+.vuepress/dist
+.cache/
+
+# dotenv environment variables - DO NOT commit 
+.env
+.env.local
+.env.* 

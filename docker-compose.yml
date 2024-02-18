@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+
+  frontend-live:
+    build:
+      context: ./frontend-live
+      target: build-stage
+    command: ["yarn", "dev"]
+    restart: always
+    environment:
+      - VITE_PROJECT_NAME=${PROJECT_NAME}
+      - VITE_CONTACT_EMAIL=${CONTACT_EMAIL}
+      - VITE_ACCOUNTS_EMAIL=${ACCOUNTS_EMAIL}
+    volumes:
+      - ./frontend-live/app:/app
+      - /app/node_modules
+    networks:
+      - networkLive
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.frontend-live.rule=Host(`${ROOT_DOMAIN}`)
+      - traefik.http.routers.frontend-live.entrypoints=web
+      - traefik.http.services.frontend-live.loadbalancer.server.port=5173
+
+  backend-live:
+    build: 
+      context: ./backend-live
+    volumes:
+      - ./backend-live:/app
+      - /app/node_modules
+    command: ["yarn", "start:dev"]
+    networks:
+      - networkLive
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.backend-live.rule=Host(`${ROOT_DOMAIN}`) && PathPrefix(`/api`)
+      - traefik.http.routers.backend-live.entrypoints=web
+      - traefik.http.services.backend-live.loadbalancer.server.port=3000
+
+  traefik:
+    image: traefik:2.10
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+    ports:
+      - 80:80
+      - 8081:8081
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - networkLive
+
+networks:
+  networkLive:
